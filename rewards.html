@@ -1,0 +1,50 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>مكافآت البنك العربي | FitGuard Jordan</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>body{font-family:Cairo,sans-serif}</style></head>
+<body class="bg-[#0b1220] text-slate-100 min-h-screen"><div id="nav"></div>
+<main class="max-w-5xl mx-auto p-4 space-y-4">
+<section class="rounded-2xl bg-[#121b2e] border border-slate-800 p-5 flex items-center justify-between flex-wrap gap-3">
+  <div><div class="text-slate-400 text-sm">رصيدك من نقاط الالتزام بالتمرين السليم</div>
+  <div class="text-5xl font-black text-sky-400"><span id="pts">0</span> <span class="text-lg text-slate-300">نقطة</span></div></div>
+  <p class="text-sm text-slate-400 max-w-xs">تكسب 10 نقاط عن كل تكرار سليم تتحقق منه الكاميرا.</p>
+</section>
+<section id="list" class="grid md:grid-cols-2 gap-3"></section>
+<section class="rounded-2xl bg-[#121b2e] border border-slate-800 p-5"><h2 class="font-bold mb-2">فاوتشراتي</h2><ul id="mine" class="space-y-2 text-sm"></ul></section>
+<script src="js/store.js"></script>
+<script>
+renderNav('rewards.html');
+// بيانات توضيحية للهاكاثون؛ استبدلها بالعروض الفعلية عند توفر شراكة حقيقية
+const REWARDS = [
+  { id:'gym1', title:'اشتراك جيم لمدة شهر',     cost:500, tag:'جيم' },
+  { id:'gym2', title:'جلسة تدريب شخصي',        cost:300, tag:'جيم' },
+  { id:'nut1', title:'خصم 15% على وجبات صحية',  cost:200, tag:'تغذية' },
+  { id:'nut2', title:'خصم 20% على المكملات',    cost:250, tag:'تغذية' },
+];
+function draw(){
+  const s = getState();
+  document.getElementById('pts').textContent = s.points;
+  document.getElementById('list').innerHTML = REWARDS.map(r => {
+    const can = s.points >= r.cost;
+    return `<div class="rounded-2xl bg-[#121b2e] border border-slate-800 p-5 space-y-3"><span class="text-xs bg-slate-800 px-2 py-1 rounded-md">${r.tag}</span>
+      <h3 class="font-bold">${r.title}</h3>
+      <div class="h-2 rounded-full bg-slate-800"><div class="h-full rounded-full bg-sky-500" style="width:${Math.min(100,s.points/r.cost*100)}%"></div></div>
+      <div class="flex justify-between items-center"><span class="text-sm text-slate-400">${r.cost} نقطة</span>
+      <button onclick="redeem('${r.id}')" ${can?'':'disabled'} class="px-4 py-1.5 rounded-lg font-bold ${can?'bg-sky-500 text-slate-950 hover:bg-sky-400':'bg-slate-800 text-slate-500 cursor-not-allowed'}">
+      ${can?'استبدل الآن':'ينقصك '+(r.cost-s.points)}</button></div></div>`;
+  }).join('');
+  document.getElementById('mine').innerHTML = s.redeemed.length
+    ? s.redeemed.map(v => `<li class="flex justify-between bg-slate-900 rounded-lg p-3"><span>${v.title}</span><code class="text-sky-400">${v.code}</code></li>`).join('')
+    : '<li class="text-slate-400">لا توجد فاوتشرات بعد. تمرّن واجمع النقاط.</li>';
+}
+function redeem(id){
+  const r = REWARDS.find(x => x.id===id), s = getState();
+  if (s.points < r.cost) return;
+  s.points -= r.cost;
+  s.redeemed.unshift({ title:r.title, code:'FG-'+Math.random().toString(36).slice(2,8).toUpperCase() });
+  saveState(s); draw();
+}
+draw();
+</script>
+</main></body></html>
